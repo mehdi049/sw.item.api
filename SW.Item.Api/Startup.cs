@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using SW.Item.Core.CategoryManagement;
+using SW.Item.Core.ItemManagement;
 using SW.Item.Data;
 
 namespace SW.Item.Api
@@ -67,6 +69,9 @@ namespace SW.Item.Api
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                     };
                 });
+
+            services.AddScoped<ICategoryManagement, CategoryManagement>();
+            services.AddScoped<IItemManagement, ItemManagement>();
 
             services.AddControllers();
         }

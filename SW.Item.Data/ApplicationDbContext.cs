@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using SW.Item.Data.Entities;
 
 namespace SW.Item.Data
 {
     public class ApplicationDbContext : DbContext
     {
+        public DbSet<Category> Category { get; set; }
+        public DbSet<SubCategory> SubCategory { get; set; }
+        public DbSet<Entities.Item> Item { get; set; }
 
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
