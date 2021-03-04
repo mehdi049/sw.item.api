@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SW.Item.Core.CategoryManagement;
 using SW.Item.Data.Common;
+using SW.Item.Data.Entities;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,6 +28,7 @@ namespace SW.Item.Api.Controllers
         }
 
         [Route("batchAddCategory")]
+        [HttpPost]
         public IActionResult BatchAddCategory()
         {
             Response response = _categoryManagement.BatchAddCategory();
@@ -34,6 +36,24 @@ namespace SW.Item.Api.Controllers
                 return Ok(new Response { Status = HttpStatusCode.OK });
 
             return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
+        [Route("batchAddSubCategory")]
+        [HttpPost]
+        public IActionResult BatchAddSubCategory()
+        {
+            Response response = _categoryManagement.BatchAddSubCategory();
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
+        [Route("getAllCategories")]
+        public IActionResult GetAllCategories()
+        {
+            Category[] categories = _categoryManagement.GetAllCategories();
+            return Ok(new Response { Status = HttpStatusCode.OK, Body = categories });
         }
     }
 }
