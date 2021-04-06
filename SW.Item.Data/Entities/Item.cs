@@ -8,21 +8,28 @@ namespace SW.Item.Data.Entities
     public class Item
     {
         public int Id { get; set; }
-        [MaxLength(20)]
+        [MaxLength(30)]
         [Required]
         public string Title { get; set; }
         public string Description { get; set; }
-        [MaxLength(10)]
-        [Required]
-        public string Condition { get; set; }
         public string Images { get; set; }
         public float? Price { get; set; }
         public bool Exchange { get; set; }
+        public DateTime AddedTime { get; set; }
+        public DateTime? LastUpdateTime { get; set; }
 
-        public string ExchangeWithCategory { get; set; }
-        public string ExchangeWithSubCategory { get; set; }
+        public int? ExchangeWithCategory { get; set; }
+        public int? ExchangeWithSubCategory { get; set; }
+
+        public int UserId { get; set; }
+
+        public int ConditionId { get; set; }
+        public ItemCondition Condition { get; set; }
 
         public int SubCategoryId { get; set; }
         public SubCategory SubCategory { get; set; }
+
+        public List<ItemFeedback> ItemFeedbacks { get; set; }
+
     }
 }

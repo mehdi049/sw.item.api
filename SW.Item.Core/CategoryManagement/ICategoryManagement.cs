@@ -12,6 +12,6 @@ namespace SW.Item.Core.CategoryManagement
         Response BatchAddSubCategory();
 
         Category GetCategory(int id);
-        Category[] GetAllCategories();
+        Category[] GetCategories();
     }
 }

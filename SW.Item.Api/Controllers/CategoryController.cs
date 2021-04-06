@@ -49,11 +49,19 @@ namespace SW.Item.Api.Controllers
             return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Route("getAllCategories")]
-        public IActionResult GetAllCategories()
+        [Route("getCategories")]
+        public IActionResult GetCategories()
         {
-            Category[] categories = _categoryManagement.GetAllCategories();
+            Category[] categories = _categoryManagement.GetCategories();
             return Ok(new Response { Status = HttpStatusCode.OK, Body = categories });
         }
+
+        [Route("getCategory/{id}")]
+        public IActionResult GetCategory(int id)
+        {
+            Category category = _categoryManagement.GetCategory(id);
+            return Ok(new Response { Status = HttpStatusCode.OK, Body = category });
+        }
+
     }
 }

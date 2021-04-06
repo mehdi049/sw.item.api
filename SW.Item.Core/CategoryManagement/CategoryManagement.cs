@@ -298,14 +298,14 @@ namespace SW.Item.Core.CategoryManagement
             }
         }
 
-        public Category[] GetAllCategories()
+        public Category[] GetCategories()
         {
             return _dbContext.Category.Include(x => x.SubCategories).ToArray();
         }
 
         public Category GetCategory(int id)
         {
-            throw new NotImplementedException();
+            return _dbContext.Category.Include(x => x.SubCategories).Where(x=>x.Id==id).FirstOrDefault();
         }
     }
 }
