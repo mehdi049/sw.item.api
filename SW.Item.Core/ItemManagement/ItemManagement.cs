@@ -5,7 +5,11 @@ using System.Linq;
 using System.Net;
 using SW.Item.Data;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using SW.Item.Data.Common.Helpers;
+using SW.Item.Data.Common.Models;
 using SW.Item.Data.Entities;
+using SW.Item.Data.Models;
 
 namespace SW.Item.Core.ItemManagement
 {
@@ -119,22 +123,94 @@ namespace SW.Item.Core.ItemManagement
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public Data.Entities.Item GetItem(int id)
+        public ItemModel GetItem(int id)
         {
-            return _dbContext.Item.Include(x => x.SubCategory)
-                .Include(x => x.SubCategory.Category)
-                .Include(x=>x.Condition)
-                .Include(x=>x.ItemFeedbacks)
-                .FirstOrDefault();
-        }
-
-        public Data.Entities.Item[] GetItems()
-        {
-            return _dbContext.Item.Include(x => x.SubCategory)
+            Data.Entities.Item item = _dbContext.Item.Include(x => x.SubCategory)
                 .Include(x => x.SubCategory.Category)
                 .Include(x => x.Condition)
                 .Include(x => x.ItemFeedbacks)
-                .ToArray();
+                .Where(x => x.Id == id).FirstOrDefault();
+
+            if (item == null)
+                return null;
+
+            Response res = ApiCall
+                .ApiGetObject("https://localhost:44363/", "api/user/getUserById/" + item.UserId);
+
+            if (res.Status == HttpStatusCode.OK)
+            {
+                UserInfo user = JsonConvert.DeserializeObject<UserInfo>(res.Body.ToString());
+                return new ItemModel()
+                {
+                    Item = item,
+                    User = user
+                };
+            }
+            return null;
+        }
+
+        public ItemModel[] GetItems()
+        {
+            Response res = ApiCall
+                .ApiGetObject("https://localhost:44363/", "api/user/getAllUsers/");
+
+            if (res.Status == HttpStatusCode.OK)
+            {
+                Data.Entities.Item[] items = _dbContext.Item.Include(x => x.SubCategory)
+                    .Include(x => x.SubCategory.Category)
+                    .Include(x => x.Condition)
+                    .Include(x => x.ItemFeedbacks)
+                    .OrderByDescending(x => x.AddedTime)
+                    .ToArray();
+
+                UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
+
+                List<ItemModel> itemModels = new List<ItemModel>();
+                foreach (var item in items)
+                {
+                    itemModels.Add(new ItemModel()
+                    {
+                        Item = item,
+                        User = users.Where(x => x.Id == item.UserId).FirstOrDefault()
+                    });
+                }
+
+                return itemModels.ToArray();
+            }
+
+            return null;
+        }
+
+        public ItemModel[] GetItemsByCategory(int categoryId)
+        {
+            Response res = ApiCall
+                .ApiGetObject("https://localhost:44363/", "api/user/getAllUsers/");
+
+            if (res.Status == HttpStatusCode.OK)
+            {
+                Data.Entities.Item[] items = _dbContext.Item.Include(x => x.SubCategory)
+                    .Include(x => x.SubCategory.Category)
+                    .Include(x => x.Condition)
+                    .Include(x => x.ItemFeedbacks).OrderByDescending(x => x.AddedTime)
+                    .Where(x=>x.SubCategory.CategoryId==categoryId)
+                    .ToArray();
+
+                UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
+
+                List<ItemModel> itemModels = new List<ItemModel>();
+                foreach (var item in items)
+                {
+                    itemModels.Add(new ItemModel()
+                    {
+                        Item = item,
+                        User = users.Where(x => x.Id == item.UserId).FirstOrDefault()
+                    });
+                }
+
+                return itemModels.ToArray();
+            }
+
+            return null;
         }
     }
 }

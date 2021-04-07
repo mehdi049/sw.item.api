@@ -1,8 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SW.Item.Core.ItemManagement;
 using SW.Item.Data.Common;
+using SW.Item.Data.Models;
 
 namespace SW.Item.Api.Controllers
 {
@@ -33,15 +35,30 @@ namespace SW.Item.Api.Controllers
         [Route("getItems")]
         public IActionResult GetItems()
         {
-            Data.Entities.Item[] items = _itemManagement.GetItems();
+            ItemModel[] items = _itemManagement.GetItems();
+            return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+        }
+
+        [Route("getItemsByCategory/{id}")]
+        public IActionResult GetItemsByCategory(int id)
+        {
+            ItemModel[] items = _itemManagement.GetItemsByCategory(id);
             return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
         }
 
         [Route("getItem/{id}")]
         public IActionResult GetItem(int id)
         {
-            Data.Entities.Item item = _itemManagement.GetItem(id);
-            return Ok(new Response { Status = HttpStatusCode.OK, Body = item });
+            try
+            {
+                ItemModel item = _itemManagement.GetItem(id);
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = item });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+            
         }
 
     }
