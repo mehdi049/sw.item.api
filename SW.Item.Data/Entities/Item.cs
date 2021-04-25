@@ -20,9 +20,6 @@ namespace SW.Item.Data.Entities
 
         public int Seen { get; set; }
 
-        [NotMapped]
-        public int LikedCount { get; set; }
-
         public int? ExchangeWithCategory { get; set; }
         public int? ExchangeWithSubCategory { get; set; }
 
@@ -35,6 +32,8 @@ namespace SW.Item.Data.Entities
         public SubCategory SubCategory { get; set; }
 
         public List<ItemFeedback> ItemFeedbacks { get; set; }
+
+        public List<LikedItem> Likes { get; set; }
 
     }
 }

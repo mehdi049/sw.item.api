@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SW.Item.Data;
 
 namespace SW.Item.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210425023821_Init11")]
+    partial class Init11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,7 +207,7 @@ namespace SW.Item.Data.Migrations
             modelBuilder.Entity("SW.Item.Data.Entities.LikedItem", b =>
                 {
                     b.HasOne("SW.Item.Data.Entities.Item", "Item")
-                        .WithMany("Likes")
+                        .WithMany()
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -232,8 +234,6 @@ namespace SW.Item.Data.Migrations
             modelBuilder.Entity("SW.Item.Data.Entities.Item", b =>
                 {
                     b.Navigation("ItemFeedbacks");
-
-                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

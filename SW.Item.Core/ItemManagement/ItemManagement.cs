@@ -128,7 +128,8 @@ namespace SW.Item.Core.ItemManagement
             Data.Entities.Item item = _dbContext.Item.Include(x => x.SubCategory)
                 .Include(x => x.SubCategory.Category)
                 .Include(x => x.Condition)
-                .Include(x => x.ItemFeedbacks)
+                .Include(x => x.ItemFeedbacks).
+                Include(x=>x.Likes)
                 .Where(x => x.Id == id).FirstOrDefault();
 
             if (item == null)
@@ -143,7 +144,10 @@ namespace SW.Item.Core.ItemManagement
 
                 foreach (var feedback in item.ItemFeedbacks)
                     feedback.User = user.Where(x => x.Id == feedback.UserId).FirstOrDefault();
-                
+
+                foreach (var like in item.Likes)
+                    like.User = user.Where(x => x.Id == like.UserId).FirstOrDefault();
+
                 return new ItemModel()
                 {
                     Item = item,

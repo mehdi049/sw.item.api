@@ -18,6 +18,6 @@ namespace SW.Item.Data.Entities
         [NotMapped]
         public UserInfo User { get; set; }
 
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
     }
 }
