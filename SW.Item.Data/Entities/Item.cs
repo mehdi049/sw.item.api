@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SW.Item.Data.Entities
 {
@@ -15,7 +16,12 @@ namespace SW.Item.Data.Entities
         public float? Price { get; set; }
         public bool Exchange { get; set; }
         public DateTime AddedTime { get; set; }
-        public DateTime? LastUpdateTime { get; set; }
+        public DateTime? LastUpdatedTime { get; set; }
+
+        public int Seen { get; set; }
+
+        [NotMapped]
+        public int LikedCount { get; set; }
 
         public int? ExchangeWithCategory { get; set; }
         public int? ExchangeWithSubCategory { get; set; }

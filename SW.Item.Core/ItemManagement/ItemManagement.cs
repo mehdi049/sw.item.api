@@ -118,7 +118,7 @@ namespace SW.Item.Core.ItemManagement
         private string RandomString(int length)
         {
             Random random = new Random();
-            const string chars = "ABCDEFGHIJ KLMNOPQRSTUVWXYZ0123456789";
+            const string chars = "ABCDE FGHIJ KLMNO PQRSTUV WXYZ01 2345 6789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
@@ -135,15 +135,19 @@ namespace SW.Item.Core.ItemManagement
                 return null;
 
             Response res = ApiCall
-                .ApiGetObject("https://localhost:44363/", "api/user/getUserById/" + item.UserId);
+                .ApiGetObject("https://localhost:44363/", "api/user/getAllUsers/");
 
             if (res.Status == HttpStatusCode.OK)
             {
-                UserInfo user = JsonConvert.DeserializeObject<UserInfo>(res.Body.ToString());
+                UserInfo[] user = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
+
+                foreach (var feedback in item.ItemFeedbacks)
+                    feedback.User = user.Where(x => x.Id == feedback.UserId).FirstOrDefault();
+                
                 return new ItemModel()
                 {
                     Item = item,
-                    User = user
+                    User = user.Where(x=>x.Id== item.UserId).FirstOrDefault()
                 };
             }
             return null;

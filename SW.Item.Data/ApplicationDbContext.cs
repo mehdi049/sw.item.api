@@ -13,6 +13,7 @@ namespace SW.Item.Data
         public DbSet<Entities.Item> Item { get; set; }
         public DbSet<ItemCondition> ItemCondition { get; set; }
         public DbSet<ItemFeedback> ItemFeedback { get; set; }
+        public DbSet<LikedItem> LikedItem { get; set; }
 
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
