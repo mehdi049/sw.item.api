@@ -20,8 +20,8 @@ namespace SW.Item.Data.Entities
 
         public int Seen { get; set; }
 
-        public int? ExchangeWithCategory { get; set; }
-        public int? ExchangeWithSubCategory { get; set; }
+        public int? ExchangeWithCategoryId { get; set; }
+        public int? ExchangeWithSubCategoryId { get; set; }
 
         public int UserId { get; set; }
 
@@ -30,6 +30,9 @@ namespace SW.Item.Data.Entities
 
         public int SubCategoryId { get; set; }
         public SubCategory SubCategory { get; set; }
+
+        public int ItemStatusId { get; set; }
+        public ItemStatus ItemStatus { get; set; }
 
         public List<ItemFeedback> ItemFeedbacks { get; set; }
 

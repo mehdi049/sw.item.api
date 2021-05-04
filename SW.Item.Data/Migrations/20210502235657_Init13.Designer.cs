@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SW.Item.Data;
 
 namespace SW.Item.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210502235657_Init13")]
+    partial class Init13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,9 +64,6 @@ namespace SW.Item.Data.Migrations
                     b.Property<string>("Images")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ItemStatusId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("LastUpdatedTime")
                         .HasColumnType("datetime2");
 
@@ -88,8 +87,6 @@ namespace SW.Item.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ConditionId");
-
-                    b.HasIndex("ItemStatusId");
 
                     b.HasIndex("SubCategoryId");
 
@@ -135,21 +132,6 @@ namespace SW.Item.Data.Migrations
                     b.HasIndex("ItemId");
 
                     b.ToTable("ItemFeedback");
-                });
-
-            modelBuilder.Entity("SW.Item.Data.Entities.ItemStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ItemStatus");
                 });
 
             modelBuilder.Entity("SW.Item.Data.Entities.LikedItem", b =>
@@ -200,12 +182,6 @@ namespace SW.Item.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SW.Item.Data.Entities.ItemStatus", "ItemStatus")
-                        .WithMany()
-                        .HasForeignKey("ItemStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SW.Item.Data.Entities.SubCategory", "SubCategory")
                         .WithMany()
                         .HasForeignKey("SubCategoryId")
@@ -213,8 +189,6 @@ namespace SW.Item.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Condition");
-
-                    b.Navigation("ItemStatus");
 
                     b.Navigation("SubCategory");
                 });

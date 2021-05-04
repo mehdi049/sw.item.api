@@ -1,6 +1,7 @@
 ﻿using SW.Item.Data.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using SW.Item.Data;
@@ -10,6 +11,7 @@ using SW.Item.Data.Common.Helpers;
 using SW.Item.Data.Common.Models;
 using SW.Item.Data.Entities;
 using SW.Item.Data.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace SW.Item.Core.ItemManagement
 {
@@ -23,8 +25,10 @@ namespace SW.Item.Core.ItemManagement
             _dbContext = dbContext;
         }
 
+
         public Response BatchAddItem()
         {
+            /** insert conditions **/
             if (_dbContext.ItemCondition.Find(1) == null)
                 _dbContext.ItemCondition.Add(new ItemCondition()
                 {
@@ -35,8 +39,27 @@ namespace SW.Item.Core.ItemManagement
                 {
                     Condition = "Neuf"
                 });
-            _dbContext.SaveChanges();
+            //  _dbContext.SaveChanges();
 
+            /** insert item status **/
+            if (_dbContext.ItemStatus.Find(1) == null)
+                _dbContext.ItemStatus.Add(new ItemStatus()
+                {
+                    Status = "Accepted"
+                });
+            if (_dbContext.ItemStatus.Find(2) == null)
+                _dbContext.ItemStatus.Add(new ItemStatus()
+                {
+                    Status = "Rejected"
+                });
+            if (_dbContext.ItemStatus.Find(3) == null)
+                _dbContext.ItemStatus.Add(new ItemStatus()
+                {
+                    Status = "Pending"
+                });
+            // _dbContext.SaveChanges();
+
+            /** insert items **/
             try
             {
                 string[] images =
@@ -60,25 +83,27 @@ namespace SW.Item.Core.ItemManagement
                         SubCategoryId = rnd.Next(89, 126),
                         ConditionId = rnd.Next(1, 2),
                         Exchange = rnd.Next(1, 2000) % 2 == 0,
-                        AddedTime = DateTime.Now,
+                        AddedTime = RandomDay(),
+                        ItemStatusId = rnd.Next(1, 3),
                         UserId = rnd.Next(1, 6),
                         Images = img
                     };
                     if (item.Exchange)
                     {
-                        item.ExchangeWithCategory = rnd.Next(1, 7);
-                        item.ExchangeWithSubCategory = rnd.Next(1, 3);
+                        item.ExchangeWithCategoryId = rnd.Next(1, 7);
+                        item.ExchangeWithSubCategoryId = rnd.Next(1, 3);
                     }
                     items.Add(item);
                 }
 
                 items.ForEach(l => _dbContext.Entry(l).State = EntityState.Added);
                 _dbContext.Item.AddRange(items);
-                _dbContext.SaveChanges();
+                // _dbContext.SaveChanges();
 
 
-                List<Data.Entities.ItemFeedback> itemFeedbacks = new List<Data.Entities.ItemFeedback>();
-                for (int i = 0; i < 1000; i++)
+                /** add item feedback **/
+                List<ItemFeedback> itemFeedbacks = new List<ItemFeedback>();
+                for (int i = 0; i < 10000; i++)
                 {
                     string img = "";
                     for (int j = 0; j < rnd.Next(1, 5); j++)
@@ -97,7 +122,6 @@ namespace SW.Item.Core.ItemManagement
                 itemFeedbacks.ForEach(l => _dbContext.Entry(l).State = EntityState.Added);
                 _dbContext.ItemFeedback.AddRange(itemFeedbacks);
                 _dbContext.SaveChanges();
-
 
                 return new Response
                 {
@@ -118,7 +142,7 @@ namespace SW.Item.Core.ItemManagement
         private string RandomString(int length)
         {
             Random random = new Random();
-            const string chars = "ABCDE FGHIJ KLMNO PQRSTUV WXYZ01 2345 6789";
+            const string chars = "ABCDE FGHIJ KLMNO PQRSTUV WXYZ 01 2345 6789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
@@ -129,7 +153,7 @@ namespace SW.Item.Core.ItemManagement
                 .Include(x => x.SubCategory.Category)
                 .Include(x => x.Condition)
                 .Include(x => x.ItemFeedbacks).
-                Include(x=>x.Likes)
+                Include(x => x.Likes)
                 .Where(x => x.Id == id).FirstOrDefault();
 
             if (item == null)
@@ -151,7 +175,7 @@ namespace SW.Item.Core.ItemManagement
                 return new ItemModel()
                 {
                     Item = item,
-                    User = user.Where(x=>x.Id== item.UserId).FirstOrDefault()
+                    User = user.Where(x => x.Id == item.UserId).FirstOrDefault()
                 };
             }
             return null;
@@ -200,7 +224,7 @@ namespace SW.Item.Core.ItemManagement
                     .Include(x => x.SubCategory.Category)
                     .Include(x => x.Condition)
                     .Include(x => x.ItemFeedbacks).OrderByDescending(x => x.AddedTime)
-                    .Where(x=>x.SubCategory.CategoryId==categoryId)
+                    .Where(x => x.SubCategory.CategoryId == categoryId)
                     .ToArray();
 
                 UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
@@ -220,5 +244,94 @@ namespace SW.Item.Core.ItemManagement
 
             return null;
         }
+
+        public Response AddItem(Data.Entities.Item item)
+        {
+            try
+            {
+                item.AddedTime = DateTime.Now;
+                item.ItemStatusId = 3;
+                _dbContext.Item.Add(item);
+                _dbContext.SaveChanges();
+
+                return new Response
+                {
+                    Status = HttpStatusCode.OK
+                };
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+        }
+
+        public Response UploadItemImages(IFormFile[] images, string uploadPath)
+        {
+            try
+            {
+                var supportedTypes = new[] { "jpg", "jpeg", "png" };
+                List<string> itemImages = new List<string>();
+
+                if (images.Length == 0)
+                    return new Response()
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Veuillez sélectionner une ou plusieurs images pour votre article."
+                    };
+
+                foreach (var image in images)
+                {
+                    string fileExt = Path.GetExtension(image.FileName.ToLower()).Substring(1);
+                    if (!supportedTypes.Contains(fileExt))
+                        return new Response()
+                        {
+                            Status = HttpStatusCode.BadRequest,
+                            Message = "Extension de l'image est invalide, veuillez utiliser .png, .jpg, .jpeg."
+                        };
+                    // < 5 mb
+                    if (image.Length > 5242880)
+                        return new Response()
+                        {
+                            Status = HttpStatusCode.BadRequest,
+                            Message = "L'image téléchargée est très grande, veuillez télécharger une image < 5 Mo."
+                        };
+
+                    if (!Directory.Exists(uploadPath))
+                        Directory.CreateDirectory(uploadPath);
+                    string fileName = Guid.NewGuid() + "_" + image.FileName.Replace(" ", "").Replace("(", "").Replace(")", "");
+                    using (FileStream fileStream = File.Create(uploadPath + fileName))
+                    {
+                        image.CopyTo(fileStream);
+                        fileStream.Flush();
+                    }
+                    itemImages.Add(fileName);
+                }
+
+                return new Response { Status = HttpStatusCode.OK, Body = itemImages };
+
+            }
+            catch (Exception e)
+            {
+                return new Response()
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite lors d'upload d'image(s), veuillez réessayer."
+                };
+            }
+        }
+
+        private DateTime RandomDay()
+        {
+            Random gen = new Random();
+            DateTime start = new DateTime(2020, 1, 1);
+            int range = (DateTime.Today - start).Days;
+            return start.AddDays(gen.Next(range));
+        }
+
+
     }
 }

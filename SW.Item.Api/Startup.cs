@@ -85,6 +85,7 @@ namespace SW.Item.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+            else app.UseHsts();
 
             app.UseHttpsRedirection();
             app.UseCors("CorsPolicy");
@@ -92,6 +93,8 @@ namespace SW.Item.Api
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
