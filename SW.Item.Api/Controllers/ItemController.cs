@@ -32,8 +32,8 @@ namespace SW.Item.Api.Controllers
             Response response = _itemManagement.BatchAddItem();
             if (response.Status == HttpStatusCode.OK)
                 return Ok(new Response { Status = HttpStatusCode.OK });
-                
-            return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
         [Route("add")]
@@ -44,7 +44,7 @@ namespace SW.Item.Api.Controllers
             if (response.Status == HttpStatusCode.OK)
                 return Ok(new Response { Status = HttpStatusCode.OK });
 
-            return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
         [Route("uploadItemImages")]
@@ -57,28 +57,66 @@ namespace SW.Item.Api.Controllers
             if (response.Status == HttpStatusCode.OK)
                 return Ok(new Response { Status = HttpStatusCode.OK, Body = response.Body });
 
-            return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
         [Route("getItems")]
         public IActionResult GetItems()
         {
-            ItemModel[] items = _itemManagement.GetItems();
-            return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            try
+            {
+                ItemModel[] items = _itemManagement.GetItems();
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+
         }
 
         [Route("getItemsByCategory/{id}")]
         public IActionResult GetItemsByCategory(int id)
         {
-            ItemModel[] items = _itemManagement.GetItemsByCategory(id);
-            return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            try
+            {
+                ItemModel[] items = _itemManagement.GetItemsByCategory(id);
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+
+        }
+
+        [Route("getItemsByUser/{id}")]
+        public IActionResult GetItemsByUser(int id)
+        {
+            try
+            {
+                ItemModel[] items = _itemManagement.GetItemsByUser(id);
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
         }
 
         [Route("getItemsBySubCategory/{id}")]
         public IActionResult GetItemsBySubCategory(int id)
         {
-            ItemModel[] items = _itemManagement.GetItemsByCategory(id);
-            return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            try
+            {
+                ItemModel[] items = _itemManagement.GetItemsByCategory(id);
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+
         }
 
         [Route("getItem/{id}")]
@@ -93,7 +131,33 @@ namespace SW.Item.Api.Controllers
             {
                 return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
             }
-            
+
+        }
+
+        [HttpDelete]
+        [Route("deleteItem/{itemId}/{userId}")]
+        public IActionResult DeleteItemByItemUserId(int itemId, int userId)
+        {
+            string uploadPath = _environment.WebRootPath + "\\SW\\upload\\items\\";
+
+            Response response = _itemManagement.DeleteItemByItemUserId(itemId, userId, uploadPath);
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
+        [HttpDelete]
+        [Route("deleteItem/{itemId}")]
+        public IActionResult DeleteItemByItemId(int itemId)
+        {
+            string uploadPath = _environment.WebRootPath + "\\SW\\upload\\items\\";
+
+            Response response = _itemManagement.DeleteItemByItemId(itemId, uploadPath);
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
     }

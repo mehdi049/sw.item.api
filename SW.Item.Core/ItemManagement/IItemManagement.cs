@@ -12,8 +12,11 @@ namespace SW.Item.Core.ItemManagement
         Response BatchAddItem();
         Response AddItem(Data.Entities.Item item);
         Response UploadItemImages(IFormFile[] images, string uploadPath);
+        Response DeleteItemByItemUserId(int itemId, int userId, string uploadPath);
+        Response DeleteItemByItemId(int itemId, string uploadPath);
         ItemModel GetItem(int id);
         ItemModel[] GetItems();
         ItemModel[] GetItemsByCategory(int categoryId);
+        ItemModel[] GetItemsByUser(int userId);
     }
 }

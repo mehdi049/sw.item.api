@@ -31,36 +31,66 @@ namespace SW.Item.Api.Controllers
         [HttpPost]
         public IActionResult BatchAddCategory()
         {
-            Response response = _categoryManagement.BatchAddCategory();
-            if (response.Status == HttpStatusCode.OK)
-                return Ok(new Response { Status = HttpStatusCode.OK });
-
-            return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+            try
+            {
+                Response response = _categoryManagement.BatchAddCategory();
+                if (response.Status == HttpStatusCode.OK)
+                    return Ok(new Response {Status = HttpStatusCode.OK});
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
         }
 
         [Route("batchAddSubCategory")]
         [HttpPost]
         public IActionResult BatchAddSubCategory()
         {
-            Response response = _categoryManagement.BatchAddSubCategory();
-            if (response.Status == HttpStatusCode.OK)
-                return Ok(new Response { Status = HttpStatusCode.OK });
+            try
+            {
+                Response response = _categoryManagement.BatchAddSubCategory();
+                if (response.Status == HttpStatusCode.OK)
+                    return Ok(new Response { Status = HttpStatusCode.OK });
 
-            return BadRequest(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+            
         }
 
         [Route("getCategories")]
         public IActionResult GetCategories()
         {
-            Category[] categories = _categoryManagement.GetCategories();
-            return Ok(new Response { Status = HttpStatusCode.OK, Body = categories });
+            try
+            {
+                Category[] categories = _categoryManagement.GetCategories();
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = categories });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+            
         }
 
         [Route("getCategory/{id}")]
         public IActionResult GetCategory(int id)
         {
-            Category category = _categoryManagement.GetCategory(id);
-            return Ok(new Response { Status = HttpStatusCode.OK, Body = category });
+            try
+            {
+                Category category = _categoryManagement.GetCategory(id);
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = category });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+            
         }
 
     }

@@ -28,40 +28,41 @@ namespace SW.Item.Core.ItemManagement
 
         public Response BatchAddItem()
         {
-            /** insert conditions **/
-            if (_dbContext.ItemCondition.Find(1) == null)
-                _dbContext.ItemCondition.Add(new ItemCondition()
-                {
-                    Condition = "Occasion"
-                });
-            if (_dbContext.ItemCondition.Find(2) == null)
-                _dbContext.ItemCondition.Add(new ItemCondition()
-                {
-                    Condition = "Neuf"
-                });
-            //  _dbContext.SaveChanges();
-
-            /** insert item status **/
-            if (_dbContext.ItemStatus.Find(1) == null)
-                _dbContext.ItemStatus.Add(new ItemStatus()
-                {
-                    Status = "Accepted"
-                });
-            if (_dbContext.ItemStatus.Find(2) == null)
-                _dbContext.ItemStatus.Add(new ItemStatus()
-                {
-                    Status = "Rejected"
-                });
-            if (_dbContext.ItemStatus.Find(3) == null)
-                _dbContext.ItemStatus.Add(new ItemStatus()
-                {
-                    Status = "Pending"
-                });
-            // _dbContext.SaveChanges();
-
-            /** insert items **/
             try
             {
+                /** insert conditions **/
+                if (_dbContext.ItemCondition.Find(1) == null)
+                    _dbContext.ItemCondition.Add(new ItemCondition()
+                    {
+                        Condition = "Occasion"
+                    });
+                if (_dbContext.ItemCondition.Find(2) == null)
+                    _dbContext.ItemCondition.Add(new ItemCondition()
+                    {
+                        Condition = "Neuf"
+                    });
+                _dbContext.SaveChanges();
+
+                /** insert item status **/
+                if (_dbContext.ItemStatus.Find(1) == null)
+                    _dbContext.ItemStatus.Add(new ItemStatus()
+                    {
+                        Status = "Accepted"
+                    });
+                if (_dbContext.ItemStatus.Find(2) == null)
+                    _dbContext.ItemStatus.Add(new ItemStatus()
+                    {
+                        Status = "Rejected"
+                    });
+                if (_dbContext.ItemStatus.Find(3) == null)
+                    _dbContext.ItemStatus.Add(new ItemStatus()
+                    {
+                        Status = "Pending"
+                    });
+                _dbContext.SaveChanges();
+
+                /** insert items **/
+
                 string[] images =
                 {
                     "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg", "img7.jpg", "img8.jpg",
@@ -98,12 +99,12 @@ namespace SW.Item.Core.ItemManagement
 
                 items.ForEach(l => _dbContext.Entry(l).State = EntityState.Added);
                 _dbContext.Item.AddRange(items);
-                // _dbContext.SaveChanges();
+                _dbContext.SaveChanges();
 
 
                 /** add item feedback **/
                 List<ItemFeedback> itemFeedbacks = new List<ItemFeedback>();
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     string img = "";
                     for (int j = 0; j < rnd.Next(1, 5); j++)
@@ -138,20 +139,12 @@ namespace SW.Item.Core.ItemManagement
             }
         }
 
-
-        private string RandomString(int length)
-        {
-            Random random = new Random();
-            const string chars = "ABCDE FGHIJ KLMNO PQRSTUV WXYZ 01 2345 6789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
         public ItemModel GetItem(int id)
         {
             Data.Entities.Item item = _dbContext.Item.Include(x => x.SubCategory)
                 .Include(x => x.SubCategory.Category)
                 .Include(x => x.Condition)
+                .Include(x => x.ItemStatus)
                 .Include(x => x.ItemFeedbacks).
                 Include(x => x.Likes)
                 .Where(x => x.Id == id).FirstOrDefault();
@@ -191,6 +184,7 @@ namespace SW.Item.Core.ItemManagement
                 Data.Entities.Item[] items = _dbContext.Item.Include(x => x.SubCategory)
                     .Include(x => x.SubCategory.Category)
                     .Include(x => x.Condition)
+                    .Include(x => x.ItemStatus)
                     .Include(x => x.ItemFeedbacks)
                     .OrderByDescending(x => x.AddedTime)
                     .ToArray();
@@ -223,6 +217,7 @@ namespace SW.Item.Core.ItemManagement
                 Data.Entities.Item[] items = _dbContext.Item.Include(x => x.SubCategory)
                     .Include(x => x.SubCategory.Category)
                     .Include(x => x.Condition)
+                    .Include(x => x.ItemStatus)
                     .Include(x => x.ItemFeedbacks).OrderByDescending(x => x.AddedTime)
                     .Where(x => x.SubCategory.CategoryId == categoryId)
                     .ToArray();
@@ -324,6 +319,143 @@ namespace SW.Item.Core.ItemManagement
             }
         }
 
+        public ItemModel[] GetItemsByUser(int userId)
+        {
+            Response res = ApiCall
+                .ApiGetObject("https://localhost:44363/", "api/user/getAllUsers/");
+
+            if (res.Status == HttpStatusCode.OK)
+            {
+                Data.Entities.Item[] items = _dbContext.Item.Include(x => x.SubCategory)
+                    .Include(x => x.SubCategory.Category)
+                    .Include(x => x.Condition)
+                    .Include(x => x.ItemStatus)
+                    .Include(x => x.ItemFeedbacks).OrderByDescending(x => x.AddedTime)
+                    .Where(x => x.UserId == userId)
+                    .ToArray();
+
+                UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
+
+                List<ItemModel> itemModels = new List<ItemModel>();
+                foreach (var item in items)
+                {
+                    itemModels.Add(new ItemModel()
+                    {
+                        Item = item,
+                        User = users.Where(x => x.Id == item.UserId).FirstOrDefault()
+                    });
+                }
+
+                return itemModels.ToArray();
+            }
+
+            return null;
+        }
+
+        public Response DeleteItemByItemUserId(int itemId, int userId, string uploadPath)
+        {
+            try
+            {
+                Data.Entities.Item item = _dbContext.Item
+                    .Include(x => x.ItemFeedbacks).
+                    Include(x => x.Likes)
+                    .Where(x => x.Id == itemId && x.UserId == userId).FirstOrDefault();
+
+                if (item == null)
+                    return new Response()
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Article non trouvé."
+                    };
+
+                foreach (var img in item.Images.Split(";"))
+                    if (!string.IsNullOrEmpty(img))
+                        File.Delete(uploadPath + img);
+
+                _dbContext.Item.Remove(item);
+
+                foreach (var feedback in item.ItemFeedbacks)
+                    _dbContext.ItemFeedback.Remove(feedback);
+
+                foreach (var like in item.Likes)
+                    _dbContext.LikedItem.Remove(like);
+
+                _dbContext.SaveChanges();
+
+                return new Response()
+                {
+                    Status = HttpStatusCode.OK
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new Response()
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+
+        }
+
+        public Response DeleteItemByItemId(int itemId, string uploadPath)
+        {
+            try
+            {
+                Data.Entities.Item item = _dbContext.Item
+                    .Include(x => x.ItemFeedbacks).
+                    Include(x => x.Likes)
+                    .Where(x => x.Id == itemId).FirstOrDefault();
+
+                if (item == null)
+                    return new Response()
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Article non trouvé."
+                    };
+
+                foreach (var img in item.Images.Split(";"))
+                    if (!string.IsNullOrEmpty(img))
+                        File.Delete(uploadPath + img);
+
+                _dbContext.Item.Remove(item);
+
+                foreach (var feedback in item.ItemFeedbacks)
+                    _dbContext.ItemFeedback.Remove(feedback);
+
+                foreach (var like in item.Likes)
+                    _dbContext.LikedItem.Remove(like);
+
+                _dbContext.SaveChanges();
+
+                return new Response()
+                {
+                    Status = HttpStatusCode.OK
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new Response()
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+        }
+
+
+        #region private methods
+
+        private string RandomString(int length)
+        {
+            Random random = new Random();
+            const string chars = "ABCDE FGHIJ KLMNO PQRSTUV WXYZ 01 2345 6789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
         private DateTime RandomDay()
         {
             Random gen = new Random();
@@ -331,6 +463,8 @@ namespace SW.Item.Core.ItemManagement
             int range = (DateTime.Today - start).Days;
             return start.AddDays(gen.Next(range));
         }
+
+        #endregion
 
 
     }
