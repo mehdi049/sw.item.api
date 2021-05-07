@@ -160,5 +160,16 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [HttpPut]
+        [Route("edit")]
+        public IActionResult Edit(Data.Entities.Item item)
+        {
+            Response response = _itemManagement.EditItem(item);
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
     }
 }

@@ -445,6 +445,47 @@ namespace SW.Item.Core.ItemManagement
             }
         }
 
+        public Response EditItem(Data.Entities.Item item)
+        {
+            try
+            {
+                Data.Entities.Item i = _dbContext.Item.Where(x=>x.Id==item.Id).FirstOrDefault();
+                if(i==null)
+                    return new Response
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Une erreur s'est produite, article non trouvé."
+                    };
+
+
+                i.Title = item.Title;
+                i.Description = item.Description;
+                i.Images = item.Images;
+                i.Price = item.Price;
+                i.Exchange = item.Exchange;
+                i.LastUpdatedTime = DateTime.Now;
+                i.ExchangeWithCategoryId = item.ExchangeWithCategoryId;
+                i.ExchangeWithSubCategoryId = item.ExchangeWithSubCategoryId;
+                i.ConditionId = item.ConditionId;
+                i.SubCategoryId = item.SubCategoryId;
+
+                _dbContext.Item.Update(i);
+                _dbContext.SaveChanges();
+
+                return new Response
+                {
+                    Status = HttpStatusCode.OK
+                };
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+        }
 
         #region private methods
 
