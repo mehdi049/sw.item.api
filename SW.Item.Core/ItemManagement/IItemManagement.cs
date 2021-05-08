@@ -12,6 +12,7 @@ namespace SW.Item.Core.ItemManagement
         Response BatchAddItem();
         Response AddItem(Data.Entities.Item item);
         Response EditItem(Data.Entities.Item item);
+        Response DeleteItemImg(int itemId, string img, string uploadPath);
         Response UploadItemImages(IFormFile[] images, string uploadPath);
         Response DeleteItemByItemUserId(int itemId, int userId, string uploadPath);
         Response DeleteItemByItemId(int itemId, string uploadPath);

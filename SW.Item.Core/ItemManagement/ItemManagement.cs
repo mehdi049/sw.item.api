@@ -449,8 +449,8 @@ namespace SW.Item.Core.ItemManagement
         {
             try
             {
-                Data.Entities.Item i = _dbContext.Item.Where(x=>x.Id==item.Id).FirstOrDefault();
-                if(i==null)
+                Data.Entities.Item i = _dbContext.Item.Where(x => x.Id == item.Id).FirstOrDefault();
+                if (i == null)
                     return new Response
                     {
                         Status = HttpStatusCode.BadRequest,
@@ -471,6 +471,46 @@ namespace SW.Item.Core.ItemManagement
 
                 _dbContext.Item.Update(i);
                 _dbContext.SaveChanges();
+
+                return new Response
+                {
+                    Status = HttpStatusCode.OK
+                };
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+        }
+
+        public Response DeleteItemImg(int itemId, string img, string uploadPath)
+        {
+            try
+            {
+                Data.Entities.Item i = _dbContext.Item.Where(x => x.Id == itemId).FirstOrDefault();
+                if (i == null)
+                    return new Response
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Une erreur s'est produite, article non trouvé."
+                    };
+                if (string.IsNullOrEmpty(img))
+                    return new Response
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Une erreur s'est produite, image non trouvé."
+                    };
+
+                i.Images = i.Images.Replace(img + ";", "");
+
+                _dbContext.Item.Update(i);
+                _dbContext.SaveChanges();
+
+                File.Delete(uploadPath + img);
 
                 return new Response
                 {

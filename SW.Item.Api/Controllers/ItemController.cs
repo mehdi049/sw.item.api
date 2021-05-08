@@ -171,5 +171,18 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [HttpPut]
+        [Route("deleteItemImg/{itemId}/{img}")]
+        public IActionResult DeleteItemImg(int itemId, string img)
+        {
+            string uploadPath = _environment.WebRootPath + "\\SW\\upload\\items\\";
+
+            Response response = _itemManagement.DeleteItemImg(itemId, img, uploadPath);
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
     }
 }
