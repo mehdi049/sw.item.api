@@ -25,6 +25,7 @@ namespace SW.Item.Core.FeedbackManagement
                 feedback.AddedTime=DateTime.Now;
                 _dbContext.ItemFeedback.Add(feedback);
                 _dbContext.SaveChanges();
+
                 return new Response
                 {
                     Status = HttpStatusCode.OK
@@ -53,6 +54,7 @@ namespace SW.Item.Core.FeedbackManagement
                     };
 
                 _dbContext.ItemFeedback.Remove(f);
+                _dbContext.SaveChanges();
 
                 return new Response
                 {

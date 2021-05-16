@@ -33,11 +33,11 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Route("delete")]
+        [Route("delete/{id}")]
         [HttpDelete]
-        public IActionResult Delete(int feedbackId)
+        public IActionResult Delete(int id)
         {
-            Response response = _feedbackManagement.DeleteFeedback(feedbackId);
+            Response response = _feedbackManagement.DeleteFeedback(id);
             if (response.Status == HttpStatusCode.OK)
                 return Ok(new Response { Status = HttpStatusCode.OK });
 
