@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ namespace SW.Item.Api.Controllers
             _environment = environment;
         }
 
+        [Authorize]
         [Route("batchAddItem")]
         [HttpPost]
         public IActionResult BatchAddItem()
@@ -36,6 +38,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [Authorize]
         [Route("add")]
         [HttpPost]
         public IActionResult Add(Data.Entities.Item item)
@@ -47,6 +50,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [Authorize]
         [Route("uploadItemImages")]
         [HttpPost]
         public IActionResult UploadItemImages([FromForm] IFormFile[] model)
@@ -134,6 +138,7 @@ namespace SW.Item.Api.Controllers
 
         }
 
+        [Authorize]
         [HttpDelete]
         [Route("deleteItem/{itemId}/{userId}")]
         public IActionResult DeleteItemByItemUserId(int itemId, int userId)
@@ -147,6 +152,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [Authorize]
         [HttpDelete]
         [Route("deleteItem/{itemId}")]
         public IActionResult DeleteItemByItemId(int itemId)
@@ -160,6 +166,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [Authorize]
         [HttpPut]
         [Route("edit")]
         public IActionResult Edit(Data.Entities.Item item)
@@ -171,6 +178,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
+        [Authorize]
         [HttpPut]
         [Route("deleteItemImg/{itemId}/{img}")]
         public IActionResult DeleteItemImg(int itemId, string img)

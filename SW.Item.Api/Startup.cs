@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SW.Item.Core.CategoryManagement;
+using SW.Item.Core.FeedbackManagement;
 using SW.Item.Core.ItemManagement;
 using SW.Item.Data;
 
@@ -72,6 +73,7 @@ namespace SW.Item.Api
 
             services.AddScoped<ICategoryManagement, CategoryManagement>();
             services.AddScoped<IItemManagement, ItemManagement>();
+            services.AddScoped<IFeedbackManagement, FeedbackManagement>();
 
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
