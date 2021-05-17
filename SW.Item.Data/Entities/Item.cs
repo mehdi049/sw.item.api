@@ -21,7 +21,12 @@ namespace SW.Item.Data.Entities
         public int Seen { get; set; }
 
         public int? ExchangeWithCategoryId { get; set; }
+        [NotMapped]
+        public Category ExchangeWithCategory { get; set; }
+
         public int? ExchangeWithSubCategoryId { get; set; }
+        [NotMapped]
+        public SubCategory ExchangeWithSubCategory { get; set; }
 
         public int UserId { get; set; }
 
@@ -36,7 +41,7 @@ namespace SW.Item.Data.Entities
 
         public List<ItemFeedback> ItemFeedbacks { get; set; }
 
-        public List<LikedItem> Likes { get; set; }
+        public List<ItemLike> Likes { get; set; }
 
     }
 }

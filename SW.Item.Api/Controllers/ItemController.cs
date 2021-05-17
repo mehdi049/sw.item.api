@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SW.Item.Core.ItemManagement;
 using SW.Item.Data.Common;
+using SW.Item.Data.Entities;
 using SW.Item.Data.Models;
 
 namespace SW.Item.Api.Controllers
@@ -186,6 +187,17 @@ namespace SW.Item.Api.Controllers
             string uploadPath = _environment.WebRootPath + "\\SW\\upload\\items\\";
 
             Response response = _itemManagement.DeleteItemImg(itemId, img, uploadPath);
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
+        [HttpPost]
+        [Route("addRemoveLike")]
+        public IActionResult AddRemoveLike(ItemLike like)
+        {
+            Response response = _itemManagement.AddRemoveLike(like);
             if (response.Status == HttpStatusCode.OK)
                 return Ok(new Response { Status = HttpStatusCode.OK });
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using SW.Item.Data.Common;
+using SW.Item.Data.Entities;
 using SW.Item.Data.Models;
 
 namespace SW.Item.Core.ItemManagement
@@ -20,5 +21,7 @@ namespace SW.Item.Core.ItemManagement
         ItemModel[] GetItems();
         ItemModel[] GetItemsByCategory(int categoryId);
         ItemModel[] GetItemsByUser(int userId);
+
+        Response AddRemoveLike(ItemLike like);
     }
 }

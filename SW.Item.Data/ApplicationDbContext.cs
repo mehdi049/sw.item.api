@@ -11,7 +11,7 @@ namespace SW.Item.Data
         public DbSet<ItemCondition> ItemCondition { get; set; }
         public DbSet<ItemStatus> ItemStatus { get; set; }
         public DbSet<ItemFeedback> ItemFeedback { get; set; }
-        public DbSet<LikedItem> LikedItem { get; set; }
+        public DbSet<ItemLike> ItemLike { get; set; }
 
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {

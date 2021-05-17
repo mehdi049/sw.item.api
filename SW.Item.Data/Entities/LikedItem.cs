@@ -6,7 +6,7 @@ using SW.Item.Data.Common.Models;
 
 namespace SW.Item.Data.Entities
 {
-    public class LikedItem
+    public class ItemLike
     {
         public int Id { get; set; }
 

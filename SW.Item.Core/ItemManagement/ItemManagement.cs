@@ -159,6 +159,12 @@ namespace SW.Item.Core.ItemManagement
             {
                 UserInfo[] user = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
 
+                if (item.ExchangeWithCategoryId.HasValue)
+                    item.ExchangeWithCategory = _dbContext.Category.Find(item.ExchangeWithCategoryId);
+
+                if (item.ExchangeWithSubCategoryId.HasValue)
+                    item.ExchangeWithSubCategory = _dbContext.SubCategory.Find(item.ExchangeWithSubCategoryId);
+
                 foreach (var feedback in item.ItemFeedbacks)
                     feedback.User = user.Where(x => x.Id == feedback.UserId).FirstOrDefault();
 
@@ -187,6 +193,7 @@ namespace SW.Item.Core.ItemManagement
                     .Include(x => x.ItemStatus)
                     .Include(x => x.ItemFeedbacks)
                     .OrderByDescending(x => x.AddedTime)
+                    .Where(x => x.ExchangeWithCategoryId.HasValue)
                     .ToArray();
 
                 UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
@@ -194,6 +201,12 @@ namespace SW.Item.Core.ItemManagement
                 List<ItemModel> itemModels = new List<ItemModel>();
                 foreach (var item in items)
                 {
+                    if (item.ExchangeWithCategoryId.HasValue)
+                        item.ExchangeWithCategory = _dbContext.Category.Find(item.ExchangeWithCategoryId);
+
+                    if (item.ExchangeWithSubCategoryId.HasValue)
+                        item.ExchangeWithSubCategory = _dbContext.SubCategory.Find(item.ExchangeWithSubCategoryId);
+
                     itemModels.Add(new ItemModel()
                     {
                         Item = item,
@@ -220,6 +233,7 @@ namespace SW.Item.Core.ItemManagement
                     .Include(x => x.ItemStatus)
                     .Include(x => x.ItemFeedbacks).OrderByDescending(x => x.AddedTime)
                     .Where(x => x.SubCategory.CategoryId == categoryId)
+                    .Where(x => x.ExchangeWithCategoryId.HasValue)
                     .ToArray();
 
                 UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
@@ -227,6 +241,12 @@ namespace SW.Item.Core.ItemManagement
                 List<ItemModel> itemModels = new List<ItemModel>();
                 foreach (var item in items)
                 {
+                    if (item.ExchangeWithCategoryId.HasValue)
+                        item.ExchangeWithCategory = _dbContext.Category.Find(item.ExchangeWithCategoryId);
+
+                    if (item.ExchangeWithSubCategoryId.HasValue)
+                        item.ExchangeWithSubCategory = _dbContext.SubCategory.Find(item.ExchangeWithSubCategoryId);
+
                     itemModels.Add(new ItemModel()
                     {
                         Item = item,
@@ -339,6 +359,12 @@ namespace SW.Item.Core.ItemManagement
                 List<ItemModel> itemModels = new List<ItemModel>();
                 foreach (var item in items)
                 {
+                    if (item.ExchangeWithCategoryId.HasValue)
+                        item.ExchangeWithCategory = _dbContext.Category.Find(item.ExchangeWithCategoryId);
+
+                    if (item.ExchangeWithSubCategoryId.HasValue)
+                        item.ExchangeWithSubCategory = _dbContext.SubCategory.Find(item.ExchangeWithSubCategoryId);
+
                     itemModels.Add(new ItemModel()
                     {
                         Item = item,
@@ -378,7 +404,7 @@ namespace SW.Item.Core.ItemManagement
                     _dbContext.ItemFeedback.Remove(feedback);
 
                 foreach (var like in item.Likes)
-                    _dbContext.LikedItem.Remove(like);
+                    _dbContext.ItemLike.Remove(like);
 
                 _dbContext.SaveChanges();
 
@@ -425,7 +451,7 @@ namespace SW.Item.Core.ItemManagement
                     _dbContext.ItemFeedback.Remove(feedback);
 
                 foreach (var like in item.Likes)
-                    _dbContext.LikedItem.Remove(like);
+                    _dbContext.ItemLike.Remove(like);
 
                 _dbContext.SaveChanges();
 
@@ -525,6 +551,33 @@ namespace SW.Item.Core.ItemManagement
                     Message = "Une erreur s'est produite, veuillez réessayer."
                 };
             }
+        }
+
+        public Response AddRemoveLike(ItemLike like)
+        {
+            try
+            {
+                ItemLike il= _dbContext.ItemLike.Where(x => x.ItemId == like.ItemId && x.UserId == like.UserId).FirstOrDefault();
+                if (il == null)
+                    _dbContext.ItemLike.Add(like);
+                else
+                    _dbContext.ItemLike.Remove(il);
+
+                _dbContext.SaveChanges();
+                return new Response
+                {
+                    Status = HttpStatusCode.OK
+                };
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+            
         }
 
         #region private methods
