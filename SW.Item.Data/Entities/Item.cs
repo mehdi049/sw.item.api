@@ -43,5 +43,8 @@ namespace SW.Item.Data.Entities
 
         public List<ItemLike> Likes { get; set; }
 
+        [NotMapped]
+        public List<ItemExchanges> ItemExchanges { get; set; }
+
     }
 }

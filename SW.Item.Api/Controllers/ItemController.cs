@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -39,7 +40,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Authorize]
+      //  [Authorize]
         [Route("add")]
         [HttpPost]
         public IActionResult Add(Data.Entities.Item item)
@@ -51,7 +52,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Authorize]
+       // [Authorize]
         [Route("uploadItemImages")]
         [HttpPost]
         public IActionResult UploadItemImages([FromForm] IFormFile[] model)
@@ -139,7 +140,7 @@ namespace SW.Item.Api.Controllers
 
         }
 
-        [Authorize]
+      //  [Authorize]
         [HttpDelete]
         [Route("deleteItem/{itemId}/{userId}")]
         public IActionResult DeleteItemByItemUserId(int itemId, int userId)
@@ -153,7 +154,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Authorize]
+      //  [Authorize]
         [HttpDelete]
         [Route("deleteItem/{itemId}")]
         public IActionResult DeleteItemByItemId(int itemId)
@@ -167,7 +168,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Authorize]
+     //   [Authorize]
         [HttpPut]
         [Route("edit")]
         public IActionResult Edit(Data.Entities.Item item)
@@ -179,7 +180,7 @@ namespace SW.Item.Api.Controllers
             return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
         }
 
-        [Authorize]
+     //   [Authorize]
         [HttpPut]
         [Route("deleteItemImg/{itemId}/{img}")]
         public IActionResult DeleteItemImg(int itemId, string img)
@@ -198,6 +199,19 @@ namespace SW.Item.Api.Controllers
         public IActionResult AddRemoveLike(ItemLike like)
         {
             Response response = _itemManagement.AddRemoveLike(like);
+            if (response.Status == HttpStatusCode.OK)
+                return Ok(new Response { Status = HttpStatusCode.OK });
+
+            return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = response.Message });
+        }
+
+
+        //   [Authorize]
+        [HttpPost]
+        [Route("addExchangeRequest/{itemId}/")]
+        public IActionResult AddExchangeRequest(int itemId, List<ItemModel> itemsForExchange)
+        {
+            Response response = _itemManagement.AddItemExchange(itemId, itemsForExchange);
             if (response.Status == HttpStatusCode.OK)
                 return Ok(new Response { Status = HttpStatusCode.OK });
 

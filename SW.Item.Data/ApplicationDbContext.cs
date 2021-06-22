@@ -12,6 +12,8 @@ namespace SW.Item.Data
         public DbSet<ItemStatus> ItemStatus { get; set; }
         public DbSet<ItemFeedback> ItemFeedback { get; set; }
         public DbSet<ItemLike> ItemLike { get; set; }
+        public DbSet<ItemExchanges> ItemExchanges { get; set; }
+        public DbSet<ItemExchangeStatus> ItemExchangeStatus { get; set; }
 
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {

@@ -47,17 +47,17 @@ namespace SW.Item.Core.ItemManagement
                 if (_dbContext.ItemStatus.Find(1) == null)
                     _dbContext.ItemStatus.Add(new ItemStatus()
                     {
-                        Status = "Accepted"
+                        Status = "Accepté"
                     });
                 if (_dbContext.ItemStatus.Find(2) == null)
                     _dbContext.ItemStatus.Add(new ItemStatus()
                     {
-                        Status = "Rejected"
+                        Status = "Rejeté"
                     });
                 if (_dbContext.ItemStatus.Find(3) == null)
                     _dbContext.ItemStatus.Add(new ItemStatus()
                     {
-                        Status = "Pending"
+                        Status = "En cours"
                     });
                 _dbContext.SaveChanges();
 
@@ -171,6 +171,29 @@ namespace SW.Item.Core.ItemManagement
                 foreach (var like in item.Likes)
                     like.User = user.Where(x => x.Id == like.UserId).FirstOrDefault();
 
+                List<ItemExchanges> itemExchanges = _dbContext.ItemExchanges.Where(x => x.ItemId == id).ToList();
+                if (itemExchanges.Count > 0)
+                {
+                    foreach (var itemExchange in itemExchanges)
+                    {
+                        string[] ItemsToExchangeIds = itemExchange.ItemsToExchangeIds.Split(";");
+                        foreach (var ItemsToExchangeId in ItemsToExchangeIds)
+                            if (!string.IsNullOrEmpty(ItemsToExchangeId))
+                            {
+                                Data.Entities.Item IE = _dbContext.Item.Include(x => x.SubCategory)
+                        .Include(x => x.SubCategory.Category)
+                        .Include(x => x.Condition)
+                        .Include(x => x.ItemStatus)
+                        .Include(x => x.ItemFeedbacks).
+                        Include(x => x.Likes)
+                        .Where(x => x.Id == int.Parse(ItemsToExchangeId)).FirstOrDefault();
+                                if (IE != null)
+                                    itemExchange.ItemsToExchange.Add(IE);
+                            }
+                    }
+                    item.ItemExchanges = itemExchanges;
+                }
+
                 return new ItemModel()
                 {
                     Item = item,
@@ -194,6 +217,7 @@ namespace SW.Item.Core.ItemManagement
                     .Include(x => x.ItemFeedbacks)
                     .OrderByDescending(x => x.AddedTime)
                     .Where(x => x.ExchangeWithCategoryId.HasValue)
+                    .OrderByDescending(x => x.AddedTime)
                     .ToArray();
 
                 UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
@@ -234,6 +258,7 @@ namespace SW.Item.Core.ItemManagement
                     .Include(x => x.ItemFeedbacks).OrderByDescending(x => x.AddedTime)
                     .Where(x => x.SubCategory.CategoryId == categoryId)
                     .Where(x => x.ExchangeWithCategoryId.HasValue)
+                    .OrderByDescending(x => x.AddedTime)
                     .ToArray();
 
                 UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
@@ -557,7 +582,7 @@ namespace SW.Item.Core.ItemManagement
         {
             try
             {
-                ItemLike il= _dbContext.ItemLike.Where(x => x.ItemId == like.ItemId && x.UserId == like.UserId).FirstOrDefault();
+                ItemLike il = _dbContext.ItemLike.Where(x => x.ItemId == like.ItemId && x.UserId == like.UserId).FirstOrDefault();
                 if (il == null)
                     _dbContext.ItemLike.Add(like);
                 else
@@ -577,7 +602,90 @@ namespace SW.Item.Core.ItemManagement
                     Message = "Une erreur s'est produite, veuillez réessayer."
                 };
             }
-            
+
+        }
+
+        public Response AddItemExchange(int itemId, List<ItemModel> itemsForExchange)
+        {
+            try
+            {
+                if (itemsForExchange == null || itemsForExchange.Count == 0)
+                    return new Response
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Une erreur s'est produite, aucun article selectionné pour l'échange."
+                    };
+
+                /** insert exchange item status **/
+                if (_dbContext.ItemExchangeStatus.Find(1) == null)
+                    _dbContext.ItemExchangeStatus.Add(new ItemExchangeStatus()
+                    {
+                        Status = "Accepté"
+                    });
+                if (_dbContext.ItemExchangeStatus.Find(2) == null)
+                    _dbContext.ItemExchangeStatus.Add(new ItemExchangeStatus()
+                    {
+                        Status = "Rejeté"
+                    });
+                if (_dbContext.ItemExchangeStatus.Find(3) == null)
+                    _dbContext.ItemExchangeStatus.Add(new ItemExchangeStatus()
+                    {
+                        Status = "En cours"
+                    });
+
+                Data.Entities.Item i = _dbContext.Item.Where(x => x.Id == itemId).FirstOrDefault();
+                if (i == null)
+                    return new Response
+                    {
+                        Status = HttpStatusCode.BadRequest,
+                        Message = "Une erreur s'est produite, article non trouvé."
+                    };
+
+                string itemForExchangeIds = "";
+                foreach (var item in itemsForExchange)
+                    itemForExchangeIds += item.Item.Id + ";";
+
+                ItemExchanges itemExchanges = new ItemExchanges
+                {
+                    ExchangeRequestTime = DateTime.Now,
+                    ExchangeStatusId = 3,
+                    ItemId = i.Id,
+                    ItemsToExchangeIds = itemForExchangeIds
+                };
+
+                _dbContext.ItemExchanges.Add(itemExchanges);
+                _dbContext.SaveChanges();
+
+                return new Response
+                {
+                    Status = HttpStatusCode.OK
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    Message = "Une erreur s'est produite, veuillez réessayer."
+                };
+            }
+        }
+
+        public Response RemoveItemExchange(int exchangeId)
+        {
+            return new Response
+            {
+                Status = HttpStatusCode.OK
+            };
+        }
+
+        public Response ItemExchangeStatusUpdate(int exchangeId, int statusId)
+        {
+            return new Response
+            {
+                Status = HttpStatusCode.OK
+            };
         }
 
         #region private methods

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SW.Item.Data;
 
 namespace SW.Item.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210618234758_Init19")]
+    partial class Init19
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +34,21 @@ namespace SW.Item.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("SW.Item.Data.Entities.ExchangeStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeStatus");
                 });
 
             modelBuilder.Entity("SW.Item.Data.Entities.Item", b =>
@@ -62,9 +79,6 @@ namespace SW.Item.Data.Migrations
                     b.Property<string>("Images")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ItemExchangesId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ItemStatusId")
                         .HasColumnType("int");
 
@@ -92,8 +106,6 @@ namespace SW.Item.Data.Migrations
 
                     b.HasIndex("ConditionId");
 
-                    b.HasIndex("ItemExchangesId");
-
                     b.HasIndex("ItemStatusId");
 
                     b.HasIndex("SubCategoryId");
@@ -116,21 +128,6 @@ namespace SW.Item.Data.Migrations
                     b.ToTable("ItemCondition");
                 });
 
-            modelBuilder.Entity("SW.Item.Data.Entities.ItemExchangeStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ItemExchangeStatus");
-                });
-
             modelBuilder.Entity("SW.Item.Data.Entities.ItemExchanges", b =>
                 {
                     b.Property<int>("Id")
@@ -146,9 +143,6 @@ namespace SW.Item.Data.Migrations
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ItemsToExchangeIds")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StatusChangeTime")
                         .HasColumnType("datetime2");
@@ -251,10 +245,6 @@ namespace SW.Item.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SW.Item.Data.Entities.ItemExchanges", null)
-                        .WithMany("ItemsToExchange")
-                        .HasForeignKey("ItemExchangesId");
-
                     b.HasOne("SW.Item.Data.Entities.ItemStatus", "ItemStatus")
                         .WithMany()
                         .HasForeignKey("ItemStatusId")
@@ -276,7 +266,7 @@ namespace SW.Item.Data.Migrations
 
             modelBuilder.Entity("SW.Item.Data.Entities.ItemExchanges", b =>
                 {
-                    b.HasOne("SW.Item.Data.Entities.ItemExchangeStatus", "ExchangeStatus")
+                    b.HasOne("SW.Item.Data.Entities.ExchangeStatus", "ExchangeStatus")
                         .WithMany()
                         .HasForeignKey("ExchangeStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -336,11 +326,6 @@ namespace SW.Item.Data.Migrations
                     b.Navigation("ItemFeedbacks");
 
                     b.Navigation("Likes");
-                });
-
-            modelBuilder.Entity("SW.Item.Data.Entities.ItemExchanges", b =>
-                {
-                    b.Navigation("ItemsToExchange");
                 });
 #pragma warning restore 612, 618
         }
