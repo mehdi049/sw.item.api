@@ -390,6 +390,29 @@ namespace SW.Item.Core.ItemManagement
                     if (item.ExchangeWithSubCategoryId.HasValue)
                         item.ExchangeWithSubCategory = _dbContext.SubCategory.Find(item.ExchangeWithSubCategoryId);
 
+                    List<ItemExchanges> itemExchanges = _dbContext.ItemExchanges.Where(x => x.ItemId == item.Id).ToList();
+                    if (itemExchanges.Count > 0)
+                    {
+                        foreach (var itemExchange in itemExchanges)
+                        {
+                            string[] ItemsToExchangeIds = itemExchange.ItemsToExchangeIds.Split(";");
+                            foreach (var ItemsToExchangeId in ItemsToExchangeIds)
+                                if (!string.IsNullOrEmpty(ItemsToExchangeId))
+                                {
+                                    Data.Entities.Item IE = _dbContext.Item.Include(x => x.SubCategory)
+                            .Include(x => x.SubCategory.Category)
+                            .Include(x => x.Condition)
+                            .Include(x => x.ItemStatus)
+                            .Include(x => x.ItemFeedbacks).
+                            Include(x => x.Likes)
+                            .Where(x => x.Id == int.Parse(ItemsToExchangeId)).FirstOrDefault();
+                                    if (IE != null)
+                                        itemExchange.ItemsToExchange.Add(IE);
+                                }
+                        }
+                        item.ItemExchanges = itemExchanges;
+                    }
+
                     itemModels.Add(new ItemModel()
                     {
                         Item = item,
