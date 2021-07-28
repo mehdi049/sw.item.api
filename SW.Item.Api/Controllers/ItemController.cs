@@ -110,6 +110,20 @@ namespace SW.Item.Api.Controllers
             }
         }
 
+        [Route("myExchanges/{id}")]
+        public IActionResult MyExchanges(int id)
+        {
+            try
+            {
+                ItemModel[] items = _itemManagement.MyExchanges(id);
+                return Ok(new Response { Status = HttpStatusCode.OK, Body = items });
+            }
+            catch (Exception e)
+            {
+                return Ok(new Response { Status = HttpStatusCode.BadRequest, Message = "Une erreur s'est produite, veuillez réessayer." });
+            }
+        }
+
         [Route("getItemsBySubCategory/{id}")]
         public IActionResult GetItemsBySubCategory(int id)
         {

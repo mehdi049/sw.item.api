@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using SW.Item.Data.Models;
 
 namespace SW.Item.Data.Entities
 {
@@ -8,7 +10,7 @@ namespace SW.Item.Data.Entities
     {
         public ItemExchanges()
         {
-            ItemsToExchange = new List<Item>();
+            ItemsToExchange = new List<ItemModel>();
         }
 
         public int Id { get; set; }
@@ -24,6 +26,8 @@ namespace SW.Item.Data.Entities
         public Item Item { get; set; }
 
         public string ItemsToExchangeIds { get; set; }
-        public List<Item> ItemsToExchange { get; set; }
+
+        [NotMapped]
+        public List<ItemModel> ItemsToExchange { get; set; }
     }
 }

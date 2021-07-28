@@ -157,7 +157,7 @@ namespace SW.Item.Core.ItemManagement
 
             if (res.Status == HttpStatusCode.OK)
             {
-                UserInfo[] user = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
+                UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
 
                 if (item.ExchangeWithCategoryId.HasValue)
                     item.ExchangeWithCategory = _dbContext.Category.Find(item.ExchangeWithCategoryId);
@@ -166,10 +166,10 @@ namespace SW.Item.Core.ItemManagement
                     item.ExchangeWithSubCategory = _dbContext.SubCategory.Find(item.ExchangeWithSubCategoryId);
 
                 foreach (var feedback in item.ItemFeedbacks)
-                    feedback.User = user.Where(x => x.Id == feedback.UserId).FirstOrDefault();
+                    feedback.User = users.Where(x => x.Id == feedback.UserId).FirstOrDefault();
 
                 foreach (var like in item.Likes)
-                    like.User = user.Where(x => x.Id == like.UserId).FirstOrDefault();
+                    like.User = users.Where(x => x.Id == like.UserId).FirstOrDefault();
 
                 List<ItemExchanges> itemExchanges = _dbContext.ItemExchanges.Where(x => x.ItemId == id).ToList();
                 if (itemExchanges.Count > 0)
@@ -184,11 +184,15 @@ namespace SW.Item.Core.ItemManagement
                         .Include(x => x.SubCategory.Category)
                         .Include(x => x.Condition)
                         .Include(x => x.ItemStatus)
-                        .Include(x => x.ItemFeedbacks).
-                        Include(x => x.Likes)
+                        .Include(x => x.ItemFeedbacks)
+                        .Include(x => x.Likes)
                         .Where(x => x.Id == int.Parse(ItemsToExchangeId)).FirstOrDefault();
                                 if (IE != null)
-                                    itemExchange.ItemsToExchange.Add(IE);
+                                    itemExchange.ItemsToExchange.Add(new ItemModel()
+                                    {
+                                        Item = IE,
+                                        User = users.Where(x => x.Id == IE.UserId).FirstOrDefault()
+                                    });
                             }
                     }
                     item.ItemExchanges = itemExchanges;
@@ -197,7 +201,7 @@ namespace SW.Item.Core.ItemManagement
                 return new ItemModel()
                 {
                     Item = item,
-                    User = user.Where(x => x.Id == item.UserId).FirstOrDefault()
+                    User = users.Where(x => x.Id == item.UserId).FirstOrDefault()
                 };
             }
             return null;
@@ -407,7 +411,11 @@ namespace SW.Item.Core.ItemManagement
                             Include(x => x.Likes)
                             .Where(x => x.Id == int.Parse(ItemsToExchangeId)).FirstOrDefault();
                                     if (IE != null)
-                                        itemExchange.ItemsToExchange.Add(IE);
+                                        itemExchange.ItemsToExchange.Add(new ItemModel()
+                                        {
+                                            Item = IE,
+                                            User = users.Where(x => x.Id == IE.UserId).FirstOrDefault()
+                                        });
                                 }
                         }
                         item.ItemExchanges = itemExchanges;
@@ -418,6 +426,60 @@ namespace SW.Item.Core.ItemManagement
                         Item = item,
                         User = users.Where(x => x.Id == item.UserId).FirstOrDefault()
                     });
+                }
+
+                return itemModels.ToArray();
+            }
+
+            return null;
+        }
+
+        public ItemModel[] MyExchanges(int userId)
+        {
+            Response res = ApiCall
+                 .ApiGetObject("https://localhost:44363/", "api/user/getAllUsers/");
+
+            if (res.Status == HttpStatusCode.OK)
+            {
+                Data.Entities.Item[] items = _dbContext.Item.Include(x => x.SubCategory)
+                    .Include(x => x.SubCategory.Category)
+                    .Where(x => x.UserId == userId)
+                    .ToArray();
+
+                UserInfo[] users = JsonConvert.DeserializeObject<UserInfo[]>(res.Body.ToString());
+
+                List<ItemModel> itemModels = new List<ItemModel>();
+                foreach (var item in items)
+                {
+                    List<ItemExchanges> itemExchanges = _dbContext.ItemExchanges.Where(x => x.ItemId == item.Id).ToList();
+                    if (itemExchanges.Count > 0)
+                    {
+                        foreach (var itemExchange in itemExchanges)
+                        {
+                            string[] ItemsToExchangeIds = itemExchange.ItemsToExchangeIds.Split(";");
+                            foreach (var ItemsToExchangeId in ItemsToExchangeIds)
+                                if (!string.IsNullOrEmpty(ItemsToExchangeId))
+                                {
+                                    Data.Entities.Item IE = _dbContext.Item.Include(x => x.SubCategory)
+                            .Include(x => x.SubCategory.Category)
+                            .Where(x => x.Id == int.Parse(ItemsToExchangeId)).FirstOrDefault();
+                                    if (IE != null)
+                                        itemExchange.ItemsToExchange.Add(new ItemModel()
+                                        {
+                                            Item = IE,
+                                            User = users.Where(x => x.Id == IE.UserId).FirstOrDefault()
+                                        });
+                                }
+                        }
+                        item.ItemExchanges = itemExchanges;
+
+                        itemModels.Add(new ItemModel()
+                        {
+                            Item = item,
+                            User = users.Where(x => x.Id == item.UserId).FirstOrDefault()
+                        });
+
+                    }
                 }
 
                 return itemModels.ToArray();

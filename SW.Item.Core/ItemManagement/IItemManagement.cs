@@ -21,6 +21,7 @@ namespace SW.Item.Core.ItemManagement
         ItemModel[] GetItems();
         ItemModel[] GetItemsByCategory(int categoryId);
         ItemModel[] GetItemsByUser(int userId);
+        ItemModel[] MyExchanges(int userId);
 
         Response AddRemoveLike(ItemLike like);
 
